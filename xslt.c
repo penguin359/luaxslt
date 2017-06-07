@@ -13,6 +13,17 @@
 #include <lualib.h>
 
 
+static int l_circumference(lua_State *L)
+{
+	//double r = lua_tonumber(L, 1);
+	printf("Parse()\n");
+	double r = luaL_checknumber(L, 1);
+	printf("r = %f\n", r);
+	lua_pushnumber(L, 2*3.141592654*r);
+	printf("c = %f\n", 2*3.141592654*r);
+	return 1;
+}
+
 int main(int argc, char** argv)
 {
 	char *docname, *stylesheet;
@@ -22,7 +33,7 @@ int main(int argc, char** argv)
 	const char *params[] = {
 		NULL,
 	};
-	char *buf = "print(\"hello, lua!\")";
+	char *buf = "print(\"hello, lua!\", circumference(5)) print(circumference(\"2\")) print(circumference(nil))";
 	//char *buf2 = "print(\"hello, lua!";
 
 	if(argc < 3) {
@@ -78,14 +89,17 @@ int main(int argc, char** argv)
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	int error = luaL_loadbuffer(L, buf, strlen(buf), "line") || lua_pcall(L, 0, 0, 0);
+	lua_pushcfunction(L, l_circumference);
+	lua_setglobal(L, "circumference");
+
+	int error = luaL_loadbuffer(L, buf, strlen(buf), "body") || lua_pcall(L, 0, 0, 0);
 	if(error) {
 		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
 		lua_pop(L, 1);
 	}
 
 #if 0
-	error = luaL_loadbuffer(L, buf2, strlen(buf2), "line") || lua_pcall(L, 0, 0, 0);
+	error = luaL_loadbuffer(L, buf2, strlen(buf2), "body") || lua_pcall(L, 0, 0, 0);
 	if(error) {
 		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
 		lua_pop(L, 1);
