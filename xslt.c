@@ -16,11 +16,80 @@
 static int l_circumference(lua_State *L)
 {
 	//double r = lua_tonumber(L, 1);
-	printf("Parse()\n");
+	printf("circumference()\n");
 	double r = luaL_checknumber(L, 1);
 	printf("r = %f\n", r);
 	lua_pushnumber(L, 2*3.141592654*r);
 	printf("c = %f\n", 2*3.141592654*r);
+	return 1;
+}
+
+struct xml_document {
+	xmlDocPtr doc;
+};
+
+static int l_parse_xml(lua_State *L)
+{
+	const char *filename = luaL_checklstring(L, 1, NULL);
+	xmlDocPtr doc;
+	struct xml_document *user;
+
+	printf("parse_xml()\n");
+	doc = xmlParseDoc((const xmlChar *)filename);
+	if(doc == NULL) {
+		//luaL_error(L, "failed to load XML document: %s", filename);
+		//return 0;
+	}
+	printf("Parsed.\n");
+	user = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
+	xmlFreeDoc(doc);
+	doc = NULL;
+	user->doc = doc;
+
+	return 1;
+}
+
+static int l_transform_xml(lua_State *L)
+{
+	/* TODO check userdata type */
+	const struct xml_document *user = (const struct xml_document *)lua_touserdata(L, 1);
+	const struct xml_document *transform2 = (const struct xml_document *)lua_touserdata(L, 2);
+	xsltStylesheetPtr transform;
+	xmlDocPtr doc, output;
+
+	printf("transform_xml()\n");
+	luaL_argcheck(L, user != NULL, 1, "'xml document' expected");
+	luaL_argcheck(L, transform2 != NULL, 2, "'xml document' expected");
+	transform = xsltParseStylesheetFile((const xmlChar *)"");
+	doc = user->doc;
+	output = xsltApplyStylesheet(transform, doc, NULL);
+	if(output == NULL) {
+		//luaL_error(L, "failed to load XML document: %s", filename);
+		//return 0;
+	}
+	printf("Transformed.\n");
+
+	return 1;
+}
+
+static const struct {
+	const char *name;
+	const lua_CFunction func;
+} xmllib[] = {
+	{"parse_xml", l_parse_xml},
+	{"transform_xml", l_transform_xml},
+	{NULL, NULL},
+};
+
+int luaopen_xml(lua_State *L)
+{
+	//lua_newtable(L);
+	lua_createtable(L, 0, sizeof(xmllib)/sizeof(xmllib[0]));
+	for(int i = 0; i < sizeof(xmllib)/sizeof(xmllib[0]); i++) {
+		lua_pushstring(L, xmllib[i].name);
+		lua_pushcfunction(L, xmllib[i].func);
+		lua_settable(L, -3);
+	}
 	return 1;
 }
 
@@ -35,6 +104,7 @@ int main(int argc, char** argv)
 	};
 	char *buf = "print(\"hello, lua!\", circumference(5)) print(circumference(\"2\")) print(circumference(nil))";
 	//char *buf2 = "print(\"hello, lua!";
+	char *buf3 = "parse_xml(\"<a/>\")parse_xml(\">\")";
 
 	if(argc < 3) {
 		fprintf(stderr, "%s xml stylesheet\n", argv[0]);
@@ -91,6 +161,10 @@ int main(int argc, char** argv)
 
 	lua_pushcfunction(L, l_circumference);
 	lua_setglobal(L, "circumference");
+	lua_pushcfunction(L, l_parse_xml);
+	lua_setglobal(L, "parse_xml");
+	lua_pushcfunction(L, l_transform_xml);
+	lua_setglobal(L, "transform_xml");
 
 	int error = luaL_loadbuffer(L, buf, strlen(buf), "body") || lua_pcall(L, 0, 0, 0);
 	if(error) {
@@ -105,6 +179,12 @@ int main(int argc, char** argv)
 		lua_pop(L, 1);
 	}
 #endif
+
+	error = luaL_loadbuffer(L, buf3, strlen(buf3), "body") || lua_pcall(L, 0, 0, 0);
+	if(error) {
+		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+	}
 
 	lua_close(L);
 
