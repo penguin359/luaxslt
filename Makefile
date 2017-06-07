@@ -1,5 +1,5 @@
-CFLAGS = $(shell pkg-config --cflags libxml-2.0 libxslt) -Wall -Werror -g -pg
-LIBS = $(shell pkg-config --libs libxml-2.0 libxslt)
+CFLAGS = $(shell pkg-config --cflags libxml-2.0 libxslt lua) -Wall -Werror -g -pg
+LIBS = $(shell pkg-config --libs libxml-2.0 libxslt lua)
 
 all: xslt
 

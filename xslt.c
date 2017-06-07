@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
@@ -6,6 +7,10 @@
 #include <libxslt/xslt.h>
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
+
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 
 
 int main(int argc, char** argv)
@@ -17,6 +22,8 @@ int main(int argc, char** argv)
 	const char *params[] = {
 		NULL,
 	};
+	char *buf = "print(\"hello, lua!\")";
+	//char *buf2 = "print(\"hello, lua!";
 
 	if(argc < 3) {
 		fprintf(stderr, "%s xml stylesheet\n", argv[0]);
@@ -67,6 +74,25 @@ int main(int argc, char** argv)
 
 	xsltCleanupGlobals();
 	xmlCleanupParser();
+
+	lua_State *L = luaL_newstate();
+	luaL_openlibs(L);
+
+	int error = luaL_loadbuffer(L, buf, strlen(buf), "line") || lua_pcall(L, 0, 0, 0);
+	if(error) {
+		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+	}
+
+#if 0
+	error = luaL_loadbuffer(L, buf2, strlen(buf2), "line") || lua_pcall(L, 0, 0, 0);
+	if(error) {
+		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+	}
+#endif
+
+	lua_close(L);
 
 	return 0;
 }
