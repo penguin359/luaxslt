@@ -163,6 +163,10 @@ int main(int argc, char** argv)
 	xmlCleanupParser();
 
 	lua_State *L = luaL_newstate();
+	if(L == NULL) {
+		fprintf(stderr, "Failed to initialize Lua interpreter\n");
+		return -1;
+	}
 	luaL_openlibs(L);
 
 	lua_pushcfunction(L, l_circumference);
@@ -171,6 +175,9 @@ int main(int argc, char** argv)
 	lua_setglobal(L, "parse_xml");
 	lua_pushcfunction(L, l_transform_xml);
 	lua_setglobal(L, "transform_xml");
+
+	luaopen_xml(L);
+	lua_setglobal(L, "xml");
 
 	int error = luaL_loadbuffer(L, buf, strlen(buf), "body") || lua_pcall(L, 0, 0, 0);
 	if(error) {
@@ -187,6 +194,12 @@ int main(int argc, char** argv)
 #endif
 
 	error = luaL_loadbuffer(L, buf3, strlen(buf3), "body") || lua_pcall(L, 0, 0, 0);
+	if(error) {
+		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
+		lua_pop(L, 1);
+	}
+
+	error = luaL_dofile(L, "xml-test.lua");
 	if(error) {
 		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
 		lua_pop(L, 1);
