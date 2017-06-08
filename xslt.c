@@ -72,10 +72,13 @@ static int l_transform_xml(lua_State *L)
 	return 1;
 }
 
+#if 0
 static const struct {
 	const char *name;
 	const lua_CFunction func;
 } xmllib[] = {
+#endif
+static const struct luaL_Reg xmllib[] = {
 	{"parse_xml", l_parse_xml},
 	{"transform_xml", l_transform_xml},
 	{NULL, NULL},
@@ -83,6 +86,7 @@ static const struct {
 
 int luaopen_xml(lua_State *L)
 {
+#if 0
 	//lua_newtable(L);
 	lua_createtable(L, 0, sizeof(xmllib)/sizeof(xmllib[0]));
 	for(int i = 0; i < sizeof(xmllib)/sizeof(xmllib[0]); i++) {
@@ -90,6 +94,8 @@ int luaopen_xml(lua_State *L)
 		lua_pushcfunction(L, xmllib[i].func);
 		lua_settable(L, -3);
 	}
+#endif
+	luaL_newlib(L, xmllib);
 	return 1;
 }
 
