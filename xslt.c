@@ -62,6 +62,27 @@ static int l_parse_xml(lua_State *L)
 	return 1;
 }
 
+static int l_parse_xml_file(lua_State *L)
+{
+	const char *filename = luaL_checklstring(L, 1, NULL);
+	struct xml_document *user;
+
+	printf("parse_xml_file()\n");
+
+	user = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
+	luaL_getmetatable(L, XML_META_TABLE);
+	lua_setmetatable(L, -2);
+
+	user->doc = xmlParseFile(filename);
+	if(user->doc == NULL) {
+		luaL_error(L, "failed to load XML document: %s", filename);
+		return 0;
+	}
+	printf("Parsed.\n");
+
+	return 1;
+}
+
 static int l_dump_xml(lua_State *L)
 {
 	const struct xml_document *user = (const struct xml_document *)luaL_checkudata(L, 1, XML_META_TABLE);
@@ -91,15 +112,21 @@ static int l_transform_xml(lua_State *L)
 	const struct xml_document *user = (const struct xml_document *)luaL_checkudata(L, 1, XML_META_TABLE);
 	const struct xml_document *transform2 = (const struct xml_document *)luaL_checkudata(L, 2, XML_META_TABLE);
 	xsltStylesheetPtr transform;
-	xmlDocPtr doc, output;
+	struct xml_document *output;
 
 	printf("transform_xml()\n");
 	luaL_argcheck(L, user != NULL, 1, "'xml document' expected");
 	luaL_argcheck(L, transform2 != NULL, 2, "'xml document' expected");
-	transform = xsltParseStylesheetFile((const xmlChar *)"");
-	doc = user->doc;
-	output = xsltApplyStylesheet(transform, doc, NULL);
-	if(output == NULL) {
+
+	output = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
+	output->doc = NULL;
+	luaL_getmetatable(L, XML_META_TABLE);
+	lua_setmetatable(L, -2);
+
+	transform = xsltParseStylesheetDoc(transform2->doc);
+	output->doc = xsltApplyStylesheet(transform, user->doc, NULL);
+	//xsltFreeStylesheet(transform);
+	if(output->doc == NULL) {
 		//luaL_error(L, "failed to load XML document: %s", filename);
 		//return 0;
 	}
@@ -116,6 +143,7 @@ static const struct {
 #endif
 static const struct luaL_Reg xmllib[] = {
 	{"parse_xml", l_parse_xml},
+	{"parse_xml_file", l_parse_xml_file},
 	{"dump_xml", l_dump_xml},
 	{"transform_xml", l_transform_xml},
 	{NULL, NULL},
