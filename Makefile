@@ -20,3 +20,4 @@ xslt: xml.so lua-test.c
 
 clean:
 	-rm xslt xml.so xslt.o
+	-rm -fr xml.so.dSYM/ xslt.dSYM/
