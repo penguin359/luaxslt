@@ -26,8 +26,8 @@ static int l_circumference(lua_State *L)
 
 
 extern int luaopen_xml(lua_State *L);
-extern int l_parse_xml(lua_State *L);
-extern int l_transform_xml(lua_State *L);
+//extern int l_parse_xml(lua_State *L);
+//extern int l_transform_xml(lua_State *L);
 
 int main(int argc, char** argv)
 {
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	};
 	char *buf = "print(\"hello, lua!\", circumference(5)) print(circumference(\"2\")) print(circumference(nil))";
 	//char *buf2 = "print(\"hello, lua!";
-	char *buf3 = "parse_xml(\"<a/>\")parse_xml(\">\")";
+	char *buf3 = "xml.parse_xml(\"<a/>\")xml.parse_xml(\">\")";
 
 	if(argc < 3) {
 		fprintf(stderr, "%s xml stylesheet\n", argv[0]);
@@ -101,10 +101,10 @@ int main(int argc, char** argv)
 
 	lua_pushcfunction(L, l_circumference);
 	lua_setglobal(L, "circumference");
-	lua_pushcfunction(L, l_parse_xml);
-	lua_setglobal(L, "parse_xml");
-	lua_pushcfunction(L, l_transform_xml);
-	lua_setglobal(L, "transform_xml");
+	//lua_pushcfunction(L, l_parse_xml);
+	//lua_setglobal(L, "parse_xml");
+	//lua_pushcfunction(L, l_transform_xml);
+	//lua_setglobal(L, "transform_xml");
 
 	luaopen_xml(L);
 	lua_setglobal(L, "xml");

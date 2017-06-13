@@ -28,33 +28,30 @@ static int xml_gc(lua_State *L)
 	return 0;
 }
 
-//static int l_parse_xml(lua_State *L)
-int l_parse_xml(lua_State *L)
+static int l_parse_xml(lua_State *L)
 {
-	const char *filename = luaL_checklstring(L, 1, NULL);
-	xmlDocPtr doc;
+	const char *string = luaL_checkstring(L, 1);
 	struct xml_document *user;
 
 	printf("parse_xml()\n");
-	doc = xmlParseDoc((const xmlChar *)filename);
-	if(doc == NULL) {
-		luaL_error(L, "failed to load XML document: %s", filename);
-		return 0;
-	}
-	printf("Parsed.\n");
+
 	user = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
 	luaL_getmetatable(L, XML_META_TABLE);
 	lua_setmetatable(L, -2);
-	//xmlFreeDoc(doc);
-	//doc = NULL;
-	user->doc = doc;
+
+	user->doc = xmlParseDoc((const xmlChar *)string);
+	if(user->doc == NULL) {
+		luaL_error(L, "failed to load XML document string: %s", string);
+		return 0;
+	}
+	printf("Parsed.\n");
 
 	return 1;
 }
 
 static int l_parse_xml_file(lua_State *L)
 {
-	const char *filename = luaL_checklstring(L, 1, NULL);
+	const char *filename = luaL_checkstring(L, 1);
 	struct xml_document *user;
 
 	printf("parse_xml_file()\n");
@@ -65,7 +62,7 @@ static int l_parse_xml_file(lua_State *L)
 
 	user->doc = xmlParseFile(filename);
 	if(user->doc == NULL) {
-		luaL_error(L, "failed to load XML document: %s", filename);
+		luaL_error(L, "failed to load XML document file: %s", filename);
 		return 0;
 	}
 	printf("Parsed.\n");
@@ -76,30 +73,27 @@ static int l_parse_xml_file(lua_State *L)
 static int l_dump_xml(lua_State *L)
 {
 	const struct xml_document *user = (const struct xml_document *)luaL_checkudata(L, 1, XML_META_TABLE);
-	xmlDocPtr doc;
 	xmlChar *dump;
 	int size;
 
 	printf("dump_xml()\n");
+
 	luaL_argcheck(L, user != NULL, 1, "'xml document' expected");
-	doc = user->doc;
-	xmlDocDumpMemory(doc, &dump, &size);
+
+	xmlDocDumpMemory(user->doc, &dump, &size);
 	if(dump == NULL) {
 		luaL_error(L, "failed to load XML document: %s", "bad");
-		//return 0;
+		return 0;
 	}
-	lua_pushstring(L, (const char *)dump);
+	lua_pushlstring(L, (const char *)dump, size);
 	xmlFree(dump);
-	lua_pushliteral(L, "Return value");
 	printf("Dumped.\n");
 
-	return 2;
+	return 1;
 }
 
-//static int l_transform_xml(lua_State *L)
-int l_transform_xml(lua_State *L)
+static int l_transform_xml(lua_State *L)
 {
-	/* TODO check userdata type */
 	const struct xml_document *user = (const struct xml_document *)luaL_checkudata(L, 1, XML_META_TABLE);
 	const struct xml_document *transform2 = (const struct xml_document *)luaL_checkudata(L, 2, XML_META_TABLE);
 	xsltStylesheetPtr transform;
@@ -126,12 +120,6 @@ int l_transform_xml(lua_State *L)
 	return 1;
 }
 
-#if 0
-static const struct {
-	const char *name;
-	const lua_CFunction func;
-} xmllib[] = {
-#endif
 static const struct luaL_Reg xmllib[] = {
 	{"parse_xml", l_parse_xml},
 	{"parse_xml_file", l_parse_xml_file},
@@ -142,19 +130,12 @@ static const struct luaL_Reg xmllib[] = {
 
 int luaopen_xml(lua_State *L)
 {
-#if 0
-	//lua_newtable(L);
-	lua_createtable(L, 0, sizeof(xmllib)/sizeof(xmllib[0]));
-	for(int i = 0; i < sizeof(xmllib)/sizeof(xmllib[0]); i++) {
-		lua_pushstring(L, xmllib[i].name);
-		lua_pushcfunction(L, xmllib[i].func);
-		lua_settable(L, -3);
-	}
-#endif
 	luaL_newmetatable(L, XML_META_TABLE);
+
 	lua_pushstring(L, "__gc");
 	lua_pushcfunction(L, xml_gc);
 	lua_settable(L, -3);
+
 	luaL_newlib(L, xmllib);
 	return 1;
 }
