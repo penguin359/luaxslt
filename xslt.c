@@ -37,16 +37,39 @@ static int l_parse_xml(lua_State *L)
 	printf("parse_xml()\n");
 	doc = xmlParseDoc((const xmlChar *)filename);
 	if(doc == NULL) {
-		//luaL_error(L, "failed to load XML document: %s", filename);
-		//return 0;
+		luaL_error(L, "failed to load XML document: %s", filename);
+		return 0;
 	}
 	printf("Parsed.\n");
 	user = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
-	xmlFreeDoc(doc);
-	doc = NULL;
+	//xmlFreeDoc(doc);
+	//doc = NULL;
 	user->doc = doc;
 
 	return 1;
+}
+
+static int l_dump_xml(lua_State *L)
+{
+	const struct xml_document *user = (const struct xml_document *)lua_touserdata(L, 1);
+	xmlDocPtr doc;
+	xmlChar *dump;
+	int size;
+
+	printf("dump_xml()\n");
+	luaL_argcheck(L, user != NULL, 1, "'xml document' expected");
+	doc = user->doc;
+	xmlDocDumpMemory(doc, &dump, &size);
+	if(dump == NULL) {
+		luaL_error(L, "failed to load XML document: %s", "bad");
+		//return 0;
+	}
+	lua_pushstring(L, (const char *)dump);
+	lua_pushliteral(L, "Return value");
+	//xmlFree(dump);
+	printf("Dumped.\n");
+
+	return 2;
 }
 
 static int l_transform_xml(lua_State *L)
@@ -80,6 +103,7 @@ static const struct {
 #endif
 static const struct luaL_Reg xmllib[] = {
 	{"parse_xml", l_parse_xml},
+	{"dump_xml", l_dump_xml},
 	{"transform_xml", l_transform_xml},
 	{NULL, NULL},
 };
