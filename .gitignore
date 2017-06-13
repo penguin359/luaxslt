@@ -1,2 +1,4 @@
 *.dSYM
+*.o
+xml.so
 xslt
