@@ -16,7 +16,8 @@ xslt.o: xslt.c
 	$(CC) $(CFLAGS) -O2 -fpic -c -o $@ $^
 
 xslt: xml.so lua-test.c
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	#$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $(CFLAGS) xslt.c lua-test.c $(LIBS)
 
 clean:
 	-rm xslt xml.so xslt.o
