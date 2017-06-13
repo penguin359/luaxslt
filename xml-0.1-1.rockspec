@@ -1,7 +1,7 @@
 package = "xml"
 version = "0.1-1"
 source = {
-   url = "https://github.com/penguin359/luaxslt"
+   url = "git://github.com/penguin359/luaxslt.git"
 }
 description = {
    homepage = "https://github.com/penguin359/luaxslt",
