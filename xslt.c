@@ -24,6 +24,8 @@ static int l_circumference(lua_State *L)
 	return 1;
 }
 
+#define XML_META_TABLE "XMLLib.xml"
+
 struct xml_document {
 	xmlDocPtr doc;
 };
@@ -42,6 +44,8 @@ static int l_parse_xml(lua_State *L)
 	}
 	printf("Parsed.\n");
 	user = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
+	luaL_getmetatable(L, XML_META_TABLE);
+	lua_setmetatable(L, -2);
 	//xmlFreeDoc(doc);
 	//doc = NULL;
 	user->doc = doc;
@@ -51,7 +55,7 @@ static int l_parse_xml(lua_State *L)
 
 static int l_dump_xml(lua_State *L)
 {
-	const struct xml_document *user = (const struct xml_document *)lua_touserdata(L, 1);
+	const struct xml_document *user = (const struct xml_document *)luaL_checkudata(L, 1, XML_META_TABLE);
 	xmlDocPtr doc;
 	xmlChar *dump;
 	int size;
@@ -75,8 +79,8 @@ static int l_dump_xml(lua_State *L)
 static int l_transform_xml(lua_State *L)
 {
 	/* TODO check userdata type */
-	const struct xml_document *user = (const struct xml_document *)lua_touserdata(L, 1);
-	const struct xml_document *transform2 = (const struct xml_document *)lua_touserdata(L, 2);
+	const struct xml_document *user = (const struct xml_document *)luaL_checkudata(L, 1, XML_META_TABLE);
+	const struct xml_document *transform2 = (const struct xml_document *)luaL_checkudata(L, 2, XML_META_TABLE);
 	xsltStylesheetPtr transform;
 	xmlDocPtr doc, output;
 
@@ -119,6 +123,7 @@ int luaopen_xml(lua_State *L)
 		lua_settable(L, -3);
 	}
 #endif
+	luaL_newmetatable(L, XML_META_TABLE);
 	luaL_newlib(L, xmllib);
 	return 1;
 }
