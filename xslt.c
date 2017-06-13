@@ -30,6 +30,15 @@ struct xml_document {
 	xmlDocPtr doc;
 };
 
+static int xml_gc(lua_State *L)
+{
+	struct xml_document *user = (struct xml_document *)lua_touserdata(L, 1);
+	if(user->doc != NULL)
+		xmlFreeDoc(user->doc);
+	user->doc = NULL;
+	return 0;
+}
+
 static int l_parse_xml(lua_State *L)
 {
 	const char *filename = luaL_checklstring(L, 1, NULL);
@@ -69,8 +78,8 @@ static int l_dump_xml(lua_State *L)
 		//return 0;
 	}
 	lua_pushstring(L, (const char *)dump);
+	xmlFree(dump);
 	lua_pushliteral(L, "Return value");
-	//xmlFree(dump);
 	printf("Dumped.\n");
 
 	return 2;
@@ -124,6 +133,9 @@ int luaopen_xml(lua_State *L)
 	}
 #endif
 	luaL_newmetatable(L, XML_META_TABLE);
+	lua_pushstring(L, "__gc");
+	lua_pushcfunction(L, xml_gc);
+	lua_settable(L, -3);
 	luaL_newlib(L, xmllib);
 	return 1;
 }
