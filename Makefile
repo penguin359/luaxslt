@@ -9,7 +9,7 @@ run: all
 check: all
 	valgrind --suppressions=suppressions --leak-check=yes --show-leak-kinds=all --error-exitcode=119 ./xslt test.xml test.xsl
 
-xslt: xslt.c
+xslt: xslt.c lua-test.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 clean:
