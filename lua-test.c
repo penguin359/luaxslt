@@ -89,9 +89,6 @@ int main(int argc, char** argv)
 	output = NULL;
 	doc = NULL;
 
-	xsltCleanupGlobals();
-	xmlCleanupParser();
-
 	lua_State *L = luaL_newstate();
 	if(L == NULL) {
 		fprintf(stderr, "Failed to initialize Lua interpreter\n");
@@ -136,6 +133,9 @@ int main(int argc, char** argv)
 	}
 
 	lua_close(L);
+
+	xsltCleanupGlobals();
+	xmlCleanupParser();
 
 	return 0;
 }

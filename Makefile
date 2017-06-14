@@ -7,7 +7,7 @@ run: all
 	./xslt test.xml test.xsl
 
 check: all
-	valgrind --suppressions=suppressions --leak-check=yes --show-leak-kinds=all --error-exitcode=119 ./xslt test.xml test.xsl
+	valgrind --suppressions=suppressions --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
 
 xml.so: xslt.o
 	$(CC) $(LIBS) -O -shared -fpic -o $@ $^

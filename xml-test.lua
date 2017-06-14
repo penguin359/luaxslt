@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-local xml = require('xml')
+--local xml = require('xml')
 
 print("Hello, world!")
 --local doc = xml.parse_xml("test.xml")

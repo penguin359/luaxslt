@@ -17,14 +17,18 @@
 
 struct xml_document {
 	xmlDocPtr doc;
+	xsltStylesheetPtr stylesheet;
 };
 
 static int xml_gc(lua_State *L)
 {
 	struct xml_document *user = (struct xml_document *)lua_touserdata(L, 1);
-	if(user->doc != NULL)
+	if(user->stylesheet != NULL)
+		xsltFreeStylesheet(user->stylesheet);
+	else if(user->doc != NULL)
 		xmlFreeDoc(user->doc);
 	user->doc = NULL;
+	user->stylesheet = NULL;
 	return 0;
 }
 
@@ -38,6 +42,8 @@ static int l_parse_xml(lua_State *L)
 	user = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
 	luaL_getmetatable(L, XML_META_TABLE);
 	lua_setmetatable(L, -2);
+	user->doc = NULL;
+	user->stylesheet = NULL;
 
 	user->doc = xmlParseDoc((const xmlChar *)string);
 	if(user->doc == NULL) {
@@ -59,6 +65,8 @@ static int l_parse_xml_file(lua_State *L)
 	user = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
 	luaL_getmetatable(L, XML_META_TABLE);
 	lua_setmetatable(L, -2);
+	user->doc = NULL;
+	user->stylesheet = NULL;
 
 	user->doc = xmlParseFile(filename);
 	if(user->doc == NULL) {
@@ -95,22 +103,22 @@ static int l_dump_xml(lua_State *L)
 static int l_transform_xml(lua_State *L)
 {
 	const struct xml_document *user = (const struct xml_document *)luaL_checkudata(L, 1, XML_META_TABLE);
-	const struct xml_document *transform2 = (const struct xml_document *)luaL_checkudata(L, 2, XML_META_TABLE);
-	xsltStylesheetPtr transform;
+	struct xml_document *transform = (struct xml_document *)luaL_checkudata(L, 2, XML_META_TABLE);
 	struct xml_document *output;
 
 	printf("transform_xml()\n");
 	luaL_argcheck(L, user != NULL, 1, "'xml document' expected");
-	luaL_argcheck(L, transform2 != NULL, 2, "'xml document' expected");
+	luaL_argcheck(L, transform != NULL, 2, "'xml document' expected");
 
 	output = (struct xml_document *)lua_newuserdata(L, sizeof(*user));
 	output->doc = NULL;
+	output->stylesheet = NULL;
 	luaL_getmetatable(L, XML_META_TABLE);
 	lua_setmetatable(L, -2);
 
-	transform = xsltParseStylesheetDoc(transform2->doc);
-	output->doc = xsltApplyStylesheet(transform, user->doc, NULL);
-	//xsltFreeStylesheet(transform);
+	if(transform->stylesheet == NULL)
+		transform->stylesheet = xsltParseStylesheetDoc(transform->doc);
+	output->doc = xsltApplyStylesheet(transform->stylesheet, user->doc, NULL);
 	if(output->doc == NULL) {
 		//luaL_error(L, "failed to load XML document: %s", filename);
 		//return 0;
