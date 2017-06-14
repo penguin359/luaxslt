@@ -1,0 +1,6 @@
+local xml = require('xml')
+describe("xml.parse_xml", function()
+	it("can parse XML", function()
+		assert.truthy(xml.parse_xml('<root/>'))
+	end)
+end)
