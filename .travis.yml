@@ -1,6 +1,7 @@
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install pkg-config libxml2-dev libxslt1-dev valgrind
+  - sudo apt-get install pkg-config libxml2-dev libxslt1-dev valgrind luarocks
+  - luarocks --local install luacheck
   - |
     if [[ "$LUA" == "lua5.3" ]]; then
       wget http://www.lua.org/ftp/lua-5.3.2.tar.gz -O lua.tar.gz
@@ -22,12 +23,14 @@ env:
     - LUA=luajit LUA_DEV=libluajit-5.1-dev LUA_INCDIR=/usr/include/luajit-2.0 LUALIB=-lluajit-5.1 LUA_VER=5.1
 
 
+sudo: required
 language: c
 compiler:
   - gcc
 
 script:
-  - make && sudo make install && make check
+  - make && sudo make install && make travischeck
+  - ~/.luarocks/bin/luacheck . || true
 
 after_script:
   - cat regression.diffs || true

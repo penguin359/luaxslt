@@ -9,9 +9,14 @@ run: all
 	./xslt test.xml test.xsl
 
 check: all
-	#valgrind --suppressions=suppressions --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
+	valgrind --suppressions=suppressions --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
+
+travischeck: all
 	# Not supported on Travis CI: --show-leak-kinds=all 
-	valgrind --suppressions=suppressions --leak-check=yes --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
+	# Travis doesn't like the suppressions file:
+	# ==6150== FATAL: in suppressions file "suppressions" near line 4:
+	# ==6150==    location should be "...", or should start with "fun:" or "obj:"
+	valgrind --leak-check=yes --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
 
 suppress: all
 	valgrind --suppressions=suppressions --gen-suppressions=all --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
