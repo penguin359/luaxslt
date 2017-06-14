@@ -18,6 +18,12 @@ travischeck: all
 	# ==6150==    location should be "...", or should start with "fun:" or "obj:"
 	valgrind --leak-check=yes --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
 
+lint:
+	luacheck *.lua spec
+
+spec:
+	busted .
+
 suppress: all
 	valgrind --suppressions=suppressions --gen-suppressions=all --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
 
@@ -38,3 +44,8 @@ xslt: xml.so lua-test.c
 clean:
 	-rm xslt xml.so xslt.o
 	-rm -fr xml.so.dSYM/ xslt.dSYM/
+
+doc:
+	ldoc -d docs
+
+.PHONY: all run check travischeck lint spec suppress install doc clean
