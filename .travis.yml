@@ -26,7 +26,7 @@ compiler:
   - gcc
 
 script:
-  - make && sudo make install && make installcheck
+  - make && sudo make install && make check
 
 after_script:
   - cat regression.diffs || true
