@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 		NULL,
 	};
 	const char *buf = "print(\"hello, lua!\", circumference(5)) print(circumference(\"2\")) print(circumference(nil))";
-	//const char *buf2 = "print(\"hello, lua!";
+	const char *buf2 = "print(\"hello, lua!";
 	const char *buf3 = "xml.parse_xml(\"<a/>\")xml.parse_xml(\">\")";
 
 	if(argc < 3) {
