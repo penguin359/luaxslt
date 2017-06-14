@@ -1,4 +1,4 @@
-CFLAGS = $(shell pkg-config --cflags libxml-2.0 libxslt lua) -Wall -Werror -g -pg -Wno-unused-variable -Wno-unused-function -O0
+CFLAGS = $(shell pkg-config --cflags libxml-2.0 libxslt lua5.2) -Wall -Werror -g -pg -Wno-unused-variable -Wno-unused-function -O0
 LIBS = $(shell pkg-config --libs libxml-2.0 libxslt lua5.2)
 
 all: xslt
