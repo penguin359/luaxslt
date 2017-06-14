@@ -38,9 +38,9 @@ int main(int argc, char** argv)
 	const char *params[] = {
 		NULL,
 	};
-	char *buf = "print(\"hello, lua!\", circumference(5)) print(circumference(\"2\")) print(circumference(nil))";
-	//char *buf2 = "print(\"hello, lua!";
-	char *buf3 = "xml.parse_xml(\"<a/>\")xml.parse_xml(\">\")";
+	const char *buf = "print(\"hello, lua!\", circumference(5)) print(circumference(\"2\")) print(circumference(nil))";
+	//const char *buf2 = "print(\"hello, lua!";
+	const char *buf3 = "xml.parse_xml(\"<a/>\")xml.parse_xml(\">\")";
 
 	if(argc < 3) {
 		fprintf(stderr, "%s xml stylesheet\n", argv[0]);
@@ -106,13 +106,14 @@ int main(int argc, char** argv)
 	luaopen_xml(L);
 	lua_setglobal(L, "xml");
 
+	int error;
+#if 0
 	int error = luaL_loadbuffer(L, buf, strlen(buf), "body") || lua_pcall(L, 0, 0, 0);
 	if(error) {
 		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
 		lua_pop(L, 1);
 	}
 
-#if 0
 	error = luaL_loadbuffer(L, buf2, strlen(buf2), "body") || lua_pcall(L, 0, 0, 0);
 	if(error) {
 		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
@@ -136,6 +137,9 @@ int main(int argc, char** argv)
 
 	xsltCleanupGlobals();
 	xmlCleanupParser();
+
+	fflush(stdout);
+	fclose(stdout);
 
 	return 0;
 }

@@ -95,6 +95,7 @@ static int l_dump_xml(lua_State *L)
 	}
 	lua_pushlstring(L, (const char *)dump, size);
 	xmlFree(dump);
+	dump = NULL;
 	printf("Dumped.\n");
 
 	return 1;
@@ -140,7 +141,7 @@ int luaopen_xml(lua_State *L)
 {
 	luaL_newmetatable(L, XML_META_TABLE);
 
-	lua_pushstring(L, "__gc");
+	lua_pushliteral(L, "__gc");
 	lua_pushcfunction(L, xml_gc);
 	lua_settable(L, -3);
 

@@ -1,4 +1,4 @@
-CFLAGS = $(shell pkg-config --cflags libxml-2.0 libxslt lua) -Wall -Werror -g -pg -Wno-unused-variable -Wno-unused-function
+CFLAGS = $(shell pkg-config --cflags libxml-2.0 libxslt lua) -Wall -Werror -g -pg -Wno-unused-variable -Wno-unused-function -O0
 LIBS = $(shell pkg-config --libs libxml-2.0 libxslt lua)
 
 all: xslt
@@ -8,6 +8,9 @@ run: all
 
 check: all
 	valgrind --suppressions=suppressions --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
+
+suppress: all
+	valgrind --suppressions=suppressions --gen-suppressions=all --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
 
 xml.so: xslt.o
 	$(CC) $(LIBS) -O -shared -fpic -o $@ $^
