@@ -1,5 +1,6 @@
-CFLAGS = $(shell pkg-config --cflags libxml-2.0 libxslt lua5.2) -Wall -Werror -g -pg -Wno-unused-variable -Wno-unused-function -O0
-LIBS = $(shell pkg-config --libs libxml-2.0 libxslt lua5.2)
+LUA_VER ?= 5.2
+CFLAGS = $(shell pkg-config --cflags libxml-2.0 libxslt lua$(LUA_VER)) -Wall -Werror -g -pg -Wno-unused-variable -Wno-unused-function -O0
+LIBS = $(shell pkg-config --libs libxml-2.0 libxslt lua$(LUA_VER))
 
 all: xslt
 
@@ -13,7 +14,8 @@ suppress: all
 	valgrind --suppressions=suppressions --gen-suppressions=all --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
 
 install: xml.so
-	cp xml.so /usr/lib/lua/5.*/
+	mkdir -p /usr/local/lib/lua/$(LUA_VER)/
+	cp xml.so /usr/local/lib/lua/$(LUA_VER)/
 
 xml.so: xslt.o
 	$(CC) $(LIBS) -O -shared -fpic -o $@ $^

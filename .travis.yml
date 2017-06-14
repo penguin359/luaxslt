@@ -17,9 +17,9 @@ before_install:
 
 env:
   matrix:
-    - LUA=lua5.1 LUA_DEV=liblua5.1-dev LUA_INCDIR=/usr/include/lua5.1 LUALIB=-llua5.1
-    - LUA=lua5.2 LUA_DEV=liblua5.2-dev LUA_INCDIR=/usr/include/lua5.2 LUALIB=-llua5.2
-    - LUA=luajit LUA_DEV=libluajit-5.1-dev LUA_INCDIR=/usr/include/luajit-2.0 LUALIB=-lluajit-5.1
+    - LUA=lua5.1 LUA_DEV=liblua5.1-dev LUA_INCDIR=/usr/include/lua5.1 LUALIB=-llua5.1 LUA_VER=5.1
+    - LUA=lua5.2 LUA_DEV=liblua5.2-dev LUA_INCDIR=/usr/include/lua5.2 LUALIB=-llua5.2 LUA_VER=5.2
+    - LUA=luajit LUA_DEV=libluajit-5.1-dev LUA_INCDIR=/usr/include/luajit-2.0 LUALIB=-lluajit-5.1 LUA_VER=5.1
 
 
 language: c
