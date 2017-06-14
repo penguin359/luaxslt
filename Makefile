@@ -12,6 +12,9 @@ check: all
 suppress: all
 	valgrind --suppressions=suppressions --gen-suppressions=all --leak-check=yes --show-leak-kinds=all --track-origins=yes --error-exitcode=119 ./xslt test.xml test.xsl
 
+install: xml.so
+	cp xml.so /usr/lib/lua/5.*/
+
 xml.so: xslt.o
 	$(CC) $(LIBS) -O -shared -fpic -o $@ $^
 
